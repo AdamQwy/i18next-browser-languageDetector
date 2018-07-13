@@ -241,6 +241,47 @@
         this.options = defaults(options, this.options || {}, getDefaults());
         this.i18nOptions = i18nOptions;
 
+		  /* fix the problem that when use the init function like this ：
+
+        [code-start]
+                i18next
+                  .use(i18nextBrowserLanguageDetector)
+                  .init({languageDetector: {
+                            lookupCookie: "i18next",
+                            caches: ['cookie']
+                            }
+                       });
+         [code-end]
+
+         *  the 'languageDetector' obj
+         *  can't rewrite the default-option of i18nextBrowserLanguageDetector
+         */
+        
+        if(this.i18nOptions.languageDetector){
+            // define the rewrite function
+            var _extends = Object.assign || function (target) {
+                for (var i = 1; i < arguments.length; i++) {
+                    var source = arguments[i];
+
+                    for (var key in source) {
+
+                        if(typeof source[key] === 'string'){
+                            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                                target[key] = source[key];
+                            }
+                        }else if(typeof source[key] === 'object'){
+                            _extends(target[key],source[key]);
+                        }
+                    }
+                }
+
+                return target;
+            };
+
+            // rewrite the default option
+            _extends(this.options, this.i18nOptions.languageDetector);
+        }
+
         this.addDetector(cookie$1);
         this.addDetector(querystring);
         this.addDetector(localStorage);
